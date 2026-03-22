@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aqui, AQUI! — Criança encontrada</title>
+  <title>Aqui, AQUI!</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -168,11 +168,6 @@
       font-size: 12px;
       color: #aaa;
     }
-    .loading {
-      font-size: 13px;
-      color: #888;
-      margin: 8px 0;
-    }
     .erro {
       background: #FCEBEB;
       border-radius: 12px;
@@ -187,13 +182,13 @@
 <body>
 <div class="card">
   <div class="logo">
-    <div class="logo-icon">👶</div>
+    <div class="logo-icon">📍</div>
     <span class="logo-text">Aqui, AQUI!</span>
   </div>
 
   <div class="status-badge">
     <div class="status-dot"></div>
-    Criança encontrada!
+    <span id="statusText">Encontrado!</span>
   </div>
 
   <div class="avatar" id="avatar">👧</div>
@@ -235,45 +230,46 @@
 
 <script>
   const params = new URLSearchParams(window.location.search);
-  const tagId   = params.get('id')    || 'ST-000000';
-  const name    = params.get('name')  || 'Criança';
-  const age     = params.get('age')   || '';
-  const phone   = params.get('phone') || '';
+  const tagId  = params.get('id')    || 'ST-000000';
+  const name   = params.get('name')  || 'Desconhecido';
+  const age    = params.get('age')   || '';
+  const phone  = params.get('phone') || '';
+  const tipo   = params.get('tipo')  || 'crianca';
+  const icon   = params.get('icon')  || 'menina';
 
-  const now   = new Date();
-  const hora  = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const now  = new Date();
+  const hora = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
 
   document.getElementById('childName').textContent = decodeURIComponent(name);
-  const gender = params.get('gender') || 'menina';
-const tipo = params.get('tipo') || 'crianca';
-const icon = params.get('icon') || 'menina';
-
-if (tipo === 'pet') {
-  if (icon === 'cachorro') document.getElementById('avatar').textContent = '🐶';
-  else if (icon === 'gato') document.getElementById('avatar').textContent = '🐱';
-  else if (icon === 'passaro') document.getElementById('avatar').textContent = '🐦';
-  else document.getElementById('avatar').textContent = '🐾';
-} else {
-  document.getElementById('avatar').textContent = icon === 'menino' ? '👦' : '👧';
-}
   document.getElementById('childAge').textContent  = age ? `${age} anos` : '';
   document.getElementById('tagId').textContent     = tagId;
   document.getElementById('hora').textContent      = hora;
 
+  // Ícone correto para criança ou pet
+  if (tipo === 'pet') {
+    if (icon === 'cachorro') document.getElementById('avatar').textContent = '🐶';
+    else if (icon === 'gato') document.getElementById('avatar').textContent = '🐱';
+    else if (icon === 'passaro') document.getElementById('avatar').textContent = '🐦';
+    else document.getElementById('avatar').textContent = '🐾';
+    document.getElementById('statusText').textContent = 'Pet encontrado!';
+  } else {
+    document.getElementById('avatar').textContent = icon === 'menino' ? '👦' : '👧';
+    document.getElementById('statusText').textContent = 'Criança encontrada!';
+  }
+
   function montarLinks(lat, lng, locText) {
-    const mapsLink  = lat ? `https://maps.google.com/?q=${lat},${lng}` : '';
-    const texto     = `Olá! Encontrei a criança ${decodeURIComponent(name)} (ID: ${tagId}) às ${hora}.` +
-                      (mapsLink ? ` Localização: ${mapsLink}` : '') +
-                      ` Estou enviando minha localização.`;
-    const waLink    = `https://api.whatsapp.com/send?phone=55${phone}&text=${encodeURIComponent(texto)}`;
-    const telLink   = `tel:+55${phone}`;
+    const mapsLink = lat ? `https://maps.google.com/?q=${lat},${lng}` : '';
+    const texto = `Olá! Encontrei ${tipo === 'pet' ? 'o pet' : 'a criança'} ${decodeURIComponent(name)} (ID: ${tagId}) às ${hora}.` +
+                  (mapsLink ? ` Localização: ${mapsLink}` : '') +
+                  ` Estou enviando minha localização.`;
+    const waLink  = `https://api.whatsapp.com/send?phone=55${phone}&text=${encodeURIComponent(texto)}`;
+    const telLink = `tel:+55${phone}`;
 
     document.getElementById('btnWhatsapp').href = waLink;
     document.getElementById('btnLigar').href    = telLink;
     document.getElementById('locationText').textContent = locText;
   }
 
-  // Capturar GPS
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -281,7 +277,7 @@ if (tipo === 'pet') {
         const lng = pos.coords.longitude.toFixed(6);
         montarLinks(lat, lng, `Lat: ${lat}, Lng: ${lng}`);
       },
-      (err) => {
+      () => {
         document.getElementById('erroBox').style.display = 'block';
         document.getElementById('locationText').textContent = 'Localização não disponível';
         montarLinks(null, null, 'Não disponível');
