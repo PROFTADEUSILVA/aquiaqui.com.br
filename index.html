@@ -245,7 +245,17 @@
 
   document.getElementById('childName').textContent = decodeURIComponent(name);
   const gender = params.get('gender') || 'menina';
-document.getElementById('avatar').textContent = gender === 'menino' ? '👦' : '👧';
+const tipo = params.get('tipo') || 'crianca';
+const icon = params.get('icon') || 'menina';
+
+if (tipo === 'pet') {
+  if (icon === 'cachorro') document.getElementById('avatar').textContent = '🐶';
+  else if (icon === 'gato') document.getElementById('avatar').textContent = '🐱';
+  else if (icon === 'passaro') document.getElementById('avatar').textContent = '🐦';
+  else document.getElementById('avatar').textContent = '🐾';
+} else {
+  document.getElementById('avatar').textContent = icon === 'menino' ? '👦' : '👧';
+}
   document.getElementById('childAge').textContent  = age ? `${age} anos` : '';
   document.getElementById('tagId').textContent     = tagId;
   document.getElementById('hora').textContent      = hora;
