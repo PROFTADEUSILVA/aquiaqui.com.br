@@ -196,7 +196,7 @@
     Criança encontrada!
   </div>
 
-  <div class="avatar">👧</div>
+  <div class="avatar" id="avatar">👧</div>
 
   <div class="child-name" id="childName">Carregando...</div>
   <div class="child-age" id="childAge"></div>
@@ -244,6 +244,8 @@
   const hora  = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
 
   document.getElementById('childName').textContent = decodeURIComponent(name);
+  const gender = params.get('gender') || 'menina';
+document.getElementById('avatar').textContent = gender === 'menino' ? '👦' : '👧';
   document.getElementById('childAge').textContent  = age ? `${age} anos` : '';
   document.getElementById('tagId').textContent     = tagId;
   document.getElementById('hora').textContent      = hora;
