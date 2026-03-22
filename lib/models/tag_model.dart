@@ -32,6 +32,9 @@ class TagModel {
   final TagPlan plan;
   final DateTime createdAt;
   final DateTime expiresAt;
+  final double? geradaLat;
+  final double? geradaLng;
+  final String? geradaEndereco;
 
   TagModel({
     required this.id,
@@ -41,6 +44,9 @@ class TagModel {
     required this.plan,
     required this.createdAt,
     required this.expiresAt,
+    this.geradaLat,
+    this.geradaLng,
+    this.geradaEndereco,
   });
 
   bool get isActive => DateTime.now().isBefore(expiresAt);
@@ -51,5 +57,12 @@ class TagModel {
     final h = diff.inHours;
     final m = diff.inMinutes % 60;
     return '${h}h${m.toString().padLeft(2, '0')}min';
+  }
+
+  String get localGerado {
+    if (geradaLat != null && geradaLng != null) {
+      return 'Lat: ${geradaLat!.toStringAsFixed(4)}, Lng: ${geradaLng!.toStringAsFixed(4)}';
+    }
+    return 'Localização não capturada';
   }
 }

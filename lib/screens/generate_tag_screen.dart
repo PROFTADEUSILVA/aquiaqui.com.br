@@ -348,12 +348,12 @@ class _GenerateTagScreenState extends State<GenerateTagScreen> {
     );
   }
 
-  void _gerar() {
+  Future<void> _gerar() async {
     if (_nameCtrl.text.isEmpty || _phoneCtrl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos!')));
       return;
     }
-    final tag = context.read<TagService>().generateTag(
+    final tag = await context.read<TagService>().generateTag(
       childName: _nameCtrl.text.trim(),
       childAge: int.tryParse(_ageCtrl.text) ?? 0,
       responsiblePhone: _phoneCtrl.text.trim(),
