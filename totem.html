@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Aqui, AQUI! — Totem</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F7F7F5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      user-select: none;
+    }
+    .tela { display: none; width: 100%; max-width: 600px; animation: fadeIn .3s ease; }
+    .tela.ativa { display: flex; flex-direction: column; align-items: center; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .logo-topo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+    .logo-img { height: 60px; border-radius: 12px; }
+    .logo-nome { font-size: 32px; font-weight: 800; color: #1A1A1A; }
+    .logo-sub { font-size: 14px; color: #888; margin-top: 2px; }
+    .card { background: white; border-radius: 24px; padding: 32px; width: 100%; border: 1px solid #eee; margin-bottom: 16px; }
+    .titulo { font-size: 26px; font-weight: 800; color: #1A1A1A; margin-bottom: 8px; text-align: center; }
+    .subtitulo { font-size: 16px; color: #888; text-align: center; margin-bottom: 28px; }
+    .btn-grande { width: 100%; padding: 22px; border-radius: 16px; border: none; font-size: 20px; font-weight: 700; cursor: pointer; margin-bottom: 14px; transition: transform .1s, opacity .1s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .btn-grande:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-verde { background: #1D9E75; color: white; }
+    .btn-cinza { background: #F7F7F5; color: #888; border: 2px solid #eee; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; margin-bottom: 20px; }
+    .opcao-card { background: white; border: 2px solid #eee; border-radius: 20px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all .2s; }
+    .opcao-card:active { transform: scale(0.97); }
+    .opcao-card.selecionado { border-color: #1D9E75; background: #E1F5EE; }
+    .opcao-emoji { font-size: 56px; margin-bottom: 12px; }
+    .opcao-label { font-size: 20px; font-weight: 700; color: #1A1A1A; }
+    .campo-grupo { width: 100%; margin-bottom: 16px; }
+    .campo-label { font-size: 14px; color: #888; margin-bottom: 6px; font-weight: 500; }
+    .campo-input { width: 100%; padding: 18px 20px; border: 2px solid #eee; border-radius: 14px; font-size: 18px; font-family: inherit; background: #fafafa; transition: border-color .2s; }
+    .campo-input:focus { outline: none; border-color: #1D9E75; background: white; }
+    .plano-card { background: white; border: 2px solid #eee; border-radius: 16px; padding: 20px 24px; margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; gap: 16px; transition: all .2s; width: 100%; }
+    .plano-card:active { transform: scale(0.98); }
+    .plano-card.selecionado { border-color: #1D9E75; background: #E1F5EE; }
+    .plano-icon { font-size: 32px; }
+    .plano-info { flex: 1; }
+    .plano-nome { font-size: 18px; font-weight: 700; }
+    .plano-desc { font-size: 13px; color: #888; margin-top: 2px; }
+    .plano-preco { font-size: 22px; font-weight: 800; color: #1D9E75; }
+    .pagamento-box { background: #F7F7F5; border-radius: 16px; padding: 24px; width: 100%; margin-bottom: 20px; text-align: center; }
+    .pagamento-valor { font-size: 48px; font-weight: 800; color: #1D9E75; }
+    .pagamento-desc { font-size: 16px; color: #888; margin-top: 4px; }
+    .metodos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-bottom: 20px; }
+    .metodo-btn { padding: 18px; border-radius: 14px; border: 2px solid #eee; background: white; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; }
+    .metodo-btn:active { transform: scale(0.97); }
+    .metodo-btn.selecionado { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+    .qr-container { background: white; border-radius: 20px; padding: 28px; text-align: center; border: 1px solid #eee; width: 100%; margin-bottom: 16px; }
+    #qrcode { margin: 0 auto 16px; }
+    .qr-nome { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .qr-info { font-size: 15px; color: #888; }
+    .qr-id { font-size: 13px; color: #aaa; font-family: monospace; margin-top: 8px; }
+    .progress-bar { display: flex; gap: 8px; margin-bottom: 28px; width: 100%; }
+    .progress-step { flex: 1; height: 6px; background: #eee; border-radius: 3px; transition: background .3s; }
+    .progress-step.feito { background: #1D9E75; }
+    .confirmado-badge { background: #E1F5EE; color: #085041; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 6px; }
+    .dot-pulse { width: 8px; height: 8px; background: #1D9E75; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .btn-voltar { position: fixed; top: 20px; left: 20px; background: white; border: 2px solid #eee; border-radius: 50%; width: 48px; height: 48px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    @media print { body * { visibility: hidden; } .qr-container, .qr-container * { visibility: visible; } .qr-container { position: absolute; top: 0; left: 0; width: 100%; } }
+  </style>
+</head>
+<body>
+
+<button class="btn-voltar" id="btnVoltar" onclick="voltar()" style="display:none">←</button>
+
+<!-- TELA 1: Inicial -->
+<div class="tela ativa" id="tela1">
+  <div class="logo-topo">
+    <img class="logo-img" src="https://raw.githubusercontent.com/PROFTADEUSILVA/aquiaqui.com.br/main/logo.png">
+  </div>
+  <div class="card" style="text-align:center">
+    <div style="font-size:72px;margin-bottom:20px">🛡️</div>
+    <div class="titulo">Bem-vindo ao totem</div>
+    <div class="subtitulo">Gere uma pulseira QR Code e mantenha sua criança ou pet seguro</div>
+    <button class="btn-grande btn-verde" onclick="irPara(2)">
+      <span>🚀</span> Começar agora
+    </button>
+  </div>
+</div>
+
+<!-- TELA 2: Tipo -->
+<div class="tela" id="tela2">
+  <div class="logo-topo">
+    <img class="logo-img" src="https://raw.githubusercontent.com/PROFTADEUSILVA/aquiaqui.com.br/main/logo.png">
+  </div>
+  <div class="progress-bar">
+    <div class="progress-step feito"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+  </div>
+  <div class="titulo">O que deseja cadastrar?</div>
+  <div class="subtitulo">Escolha uma opção para continuar</div>
+  <div class="grid-2">
+    <div class="opcao-card" id="opcao-crianca" onclick="selecionarTipo('crianca')">
+      <div class="opcao-emoji">👶</div>
+      <div class="opcao-label">Criança</div>
+    </div>
+    <div class="opcao-card" id="opcao-pet" onclick="selecionarTipo('pet')">
+      <div class="opcao-emoji">🐾</div>
+      <div class="opcao-label">Pet</div>
+    </div>
+  </div>
+  <button class="btn-grande btn-verde" onclick="irPara(3)" id="btnTipo" disabled style="opacity:.5">Continuar →</button>
+</div>
+
+<!-- TELA 3: Dados -->
+<div class="tela" id="tela3">
+  <div class="logo-topo">
+    <img class="logo-img" src="https://raw.githubusercontent.com/PROFTADEUSILVA/aquiaqui.com.br/main/logo.png">
+  </div>
+  <div class="progress-bar">
+    <div class="progress-step feito"></div>
+    <div class="progress-step feito"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+  </div>
+  <div class="titulo" id="tituloDados">Dados da criança</div>
+  <div class="subtitulo">Aparecem quando a pulseira for escaneada</div>
+  <div class="card" style="padding:24px">
+    <div class="campo-grupo">
+      <div class="campo-label" id="labelNome">Nome da criança</div>
+      <input class="campo-input" id="inputNome" type="text" placeholder="Ex: Maria Santos">
+    </div>
+    <div class="campo-grupo" id="grupoIdade">
+      <div class="campo-label">Idade</div>
+      <input class="campo-input" id="inputIdade" type="number" placeholder="Ex: 6">
+    </div>
+    <div class="campo-grupo" id="grupoRaca" style="display:none">
+      <div class="campo-label">Raça</div>
+      <input class="campo-input" id="inputRaca" type="text" placeholder="Ex: Labrador">
+    </div>
+    <div class="campo-grupo">
+      <div class="campo-label">WhatsApp do responsável</div>
+      <input class="campo-input" id="inputPhone" type="tel" placeholder="Ex: 71999990000">
+    </div>
+    <div id="grupoGenero">
+      <div class="campo-label" style="margin-bottom:10px">Gênero</div>
+      <div class="grid-2">
+        <div class="opcao-card" id="opcao-menina" onclick="selecionarGenero('menina')" style="padding:16px">
+          <div class="opcao-emoji" style="font-size:40px">👧</div>
+          <div class="opcao-label" style="font-size:16px">Menina</div>
+        </div>
+        <div class="opcao-card" id="opcao-menino" onclick="selecionarGenero('menino')" style="padding:16px">
+          <div class="opcao-emoji" style="font-size:40px">👦</div>
+          <div class="opcao-label" style="font-size:16px">Menino</div>
+        </div>
+      </div>
+    </div>
+    <div id="grupoEspecie" style="display:none">
+      <div class="campo-label" style="margin-bottom:10px">Espécie</div>
+      <div class="grid-2">
+        <div class="opcao-card" id="opcao-cachorro" onclick="selecionarEspecie('cachorro')" style="padding:16px">
+          <div class="opcao-emoji" style="font-size:40px">🐶</div>
+          <div class="opcao-label" style="font-size:16px">Cachorro</div>
+        </div>
+        <div class="opcao-card" id="opcao-gato" onclick="selecionarEspecie('gato')" style="padding:16px">
+          <div class="opcao-emoji" style="font-size:40px">🐱</div>
+          <div class="opcao-label" style="font-size:16px">Gato</div>
+        </div>
+        <div class="opcao-card" id="opcao-passaro" onclick="selecionarEspecie('passaro')" style="padding:16px">
+          <div class="opcao-emoji" style="font-size:40px">🐦</div>
+          <div class="opcao-label" style="font-size:16px">Pássaro</div>
+        </div>
+        <div class="opcao-card" id="opcao-outro" onclick="selecionarEspecie('outro')" style="padding:16px">
+          <div class="opcao-emoji" style="font-size:40px">🐾</div>
+          <div class="opcao-label" style="font-size:16px">Outro</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-grande btn-verde" onclick="irParaDados()">Continuar →</button>
+</div>
+
+<!-- TELA 4: Plano -->
+<div class="tela" id="tela4">
+  <div class="logo-topo">
+    <img class="logo-img" src="https://raw.githubusercontent.com/PROFTADEUSILVA/aquiaqui.com.br/main/logo.png">
+  </div>
+  <div class="progress-bar">
+    <div class="progress-step feito"></div>
+    <div class="progress-step feito"></div>
+    <div class="progress-step feito"></div>
+    <div class="progress-step"></div>
+  </div>
+  <div class="titulo">Escolha o plano</div>
+  <div class="subtitulo">A pulseira ficará ativa pelo período escolhido</div>
+  <div class="plano-card" id="plano-24h" onclick="selecionarPlano('hours24', 8, '24 horas')">
+    <div class="plano-icon">☀️</div>
+    <div class="plano-info"><div class="plano-nome">24 horas</div><div class="plano-desc">Passeio, praia, parque</div></div>
+    <div class="plano-preco">R$ 8</div>
+  </div>
+  <div class="plano-card" id="plano-48h" onclick="selecionarPlano('hours48', 15, '48 horas')">
+    <div class="plano-icon">🏖️</div>
+    <div class="plano-info"><div class="plano-nome">48 horas</div><div class="plano-desc">Final de semana</div></div>
+    <div class="plano-preco">R$ 15</div>
+  </div>
+  <div class="plano-card" id="plano-7d" onclick="selecionarPlano('days7', 32, '7 dias')">
+    <div class="plano-icon">🧳</div>
+    <div class="plano-info"><div class="plano-nome">7 dias</div><div class="plano-desc">Viagem, resort, acampamento</div></div>
+    <div class="plano-preco">R$ 32</div>
+  </div>
+  <button class="btn-grande btn-verde" onclick="irPara(5)" id="btnPlano" disabled style="opacity:.5;margin-top:8px">Ir para pagamento →</button>
+</div>
+
+<!-- TELA 5: Pagamento -->
+<div class="tela" id="tela5">
+  <div class="logo-topo">
+    <img class="logo-img" src="https://raw.githubusercontent.com/PROFTADEUSILVA/aquiaqui.com.br/main/logo.png">
+  </div>
+  <div class="progress-bar">
+    <div class="progress-step feito"></div>
+    <div class="progress-step feito"></div>
+    <div class="progress-step feito"></div>
+    <div class="progress-step feito"></div>
+  </div>
+  <div class="titulo">Pagamento</div>
+  <div class="subtitulo">Escolha a forma de pagamento</div>
+  <div class="pagamento-box">
+    <div class="pagamento-valor" id="valorPagamento">R$ 0</div>
+    <div class="pagamento-desc" id="descPagamento">Pulseira 24 horas</div>
+  </div>
+  <div class="metodos">
+    <button class="metodo-btn" id="metodo-pix" onclick="selecionarMetodo('pix')">
+      <span style="font-size:24px">💸</span> PIX
+    </button>
+    <button class="metodo-btn" id="metodo-cartao" onclick="selecionarMetodo('cartao')">
+      <span style="font-size:24px">💳</span> Cartão
+    </button>
+  </div>
+  <button class="btn-grande btn-verde" onclick="confirmarPagamento()" id="btnPagar" disabled style="opacity:.5">
+    ✅ Confirmar pagamento
+  </button>
+  <button class="btn-grande btn-cinza" onclick="confirmarPagamento()" style="font-size:15px">
+    <span>🧪</span> Simular pagamento (teste)
+  </button>
+  <div style="font-size:13px;color:#aaa;text-align:center">O QR Code será gerado após a confirmação</div>
+</div>
+
+<!-- TELA 6: QR Code -->
+<div class="tela" id="tela6">
+  <div class="logo-topo">
+    <img class="logo-img" src="https://raw.githubusercontent.com/PROFTADEUSILVA/aquiaqui.com.br/main/logo.png">
+  </div>
+  <div class="confirmado-badge">
+    <div class="dot-pulse"></div>
+    Pagamento confirmado!
+  </div>
+  <div class="qr-container">
+    <div id="qrcode"></div>
+    <div class="qr-nome" id="qrNome"></div>
+    <div class="qr-info" id="qrInfo"></div>
+    <div class="qr-id" id="qrId"></div>
+  </div>
+  <div style="background:#FAEEDA;border-radius:14px;padding:16px;width:100%;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:24px">🖨️</span>
+    <span style="font-size:14px;color:#633806">Imprima esta tela, plastifique e coloque na pulseira</span>
+  </div>
+  <button class="btn-grande btn-verde" onclick="window.print()">
+    <span>🖨️</span> Imprimir pulseira
+  </button>
+  <button class="btn-grande btn-cinza" onclick="irPara(1)" style="font-size:16px">
+    <span>🔄</span> Gerar nova pulseira
+  </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  let telaAtual = 1;
+  let tipo = '';
+  let genero = 'menina';
+  let especie = 'cachorro';
+  let planoSelecionado = '';
+  let valorSelecionado = 0;
+  let descPlano = '';
+  let metodoSelecionado = '';
+
+  function irPara(n) {
+    document.getElementById('tela' + telaAtual).classList.remove('ativa');
+    telaAtual = n;
+    document.getElementById('tela' + n).classList.add('ativa');
+    document.getElementById('btnVoltar').style.display = n > 1 && n < 6 ? 'flex' : 'none';
+    window.scrollTo(0, 0);
+  }
+
+  function voltar() { if (telaAtual > 1) irPara(telaAtual - 1); }
+
+  function selecionarTipo(t) {
+    tipo = t;
+    document.querySelectorAll('#tela2 .opcao-card').forEach(c => c.classList.remove('selecionado'));
+    document.getElementById('opcao-' + t).classList.add('selecionado');
+    document.getElementById('btnTipo').disabled = false;
+    document.getElementById('btnTipo').style.opacity = '1';
+    if (t === 'crianca') {
+      document.getElementById('tituloDados').textContent = 'Dados da criança';
+      document.getElementById('labelNome').textContent = 'Nome da criança';
+      document.getElementById('grupoIdade').style.display = 'block';
+      document.getElementById('grupoRaca').style.display = 'none';
+      document.getElementById('grupoGenero').style.display = 'block';
+      document.getElementById('grupoEspecie').style.display = 'none';
+    } else {
+      document.getElementById('tituloDados').textContent = 'Dados do pet';
+      document.getElementById('labelNome').textContent = 'Nome do pet';
+      document.getElementById('grupoIdade').style.display = 'none';
+      document.getElementById('grupoRaca').style.display = 'block';
+      document.getElementById('grupoGenero').style.display = 'none';
+      document.getElementById('grupoEspecie').style.display = 'block';
+    }
+  }
+
+  function selecionarGenero(g) {
+    genero = g;
+    document.querySelectorAll('#grupoGenero .opcao-card').forEach(c => c.classList.remove('selecionado'));
+    document.getElementById('opcao-' + g).classList.add('selecionado');
+  }
+
+  function selecionarEspecie(e) {
+    especie = e;
+    document.querySelectorAll('#grupoEspecie .opcao-card').forEach(c => c.classList.remove('selecionado'));
+    document.getElementById('opcao-' + e).classList.add('selecionado');
+  }
+
+  function irParaDados() {
+    const nome = document.getElementById('inputNome').value.trim();
+    const phone = document.getElementById('inputPhone').value.trim();
+    if (!nome || !phone) { alert('Preencha o nome e o WhatsApp!'); return; }
+    irPara(4);
+  }
+
+  function selecionarPlano(p, valor, desc) {
+    planoSelecionado = p;
+    valorSelecionado = valor;
+    descPlano = desc;
+    document.querySelectorAll('.plano-card').forEach(c => c.classList.remove('selecionado'));
+    const ids = { hours24: 'plano-24h', hours48: 'plano-48h', days7: 'plano-7d' };
+    document.getElementById(ids[p]).classList.add('selecionado');
+    document.getElementById('btnPlano').disabled = false;
+    document.getElementById('btnPlano').style.opacity = '1';
+    document.getElementById('valorPagamento').textContent = 'R$ ' + valor;
+    document.getElementById('descPagamento').textContent = 'Pulseira ' + desc;
+  }
+
+  function selecionarMetodo(m) {
+    metodoSelecionado = m;
+    document.querySelectorAll('.metodo-btn').forEach(b => b.classList.remove('selecionado'));
+    document.getElementById('metodo-' + m).classList.add('selecionado');
+    document.getElementById('btnPagar').disabled = false;
+    document.getElementById('btnPagar').style.opacity = '1';
+  }
+
+  function confirmarPagamento() {
+    const nome = document.getElementById('inputNome').value.trim();
+    const phone = document.getElementById('inputPhone').value.trim();
+    const idade = document.getElementById('inputIdade').value.trim();
+    const raca = document.getElementById('inputRaca').value.trim();
+    const id = 'ST-' + Date.now().toString().substring(5);
+    const icon = tipo === 'crianca' ? genero : especie;
+    const link = 'https://proftadeusilva.github.io/aquiaqui.com.br?id=' + id + '&name=' + encodeURIComponent(nome) + '&age=' + idade + '&phone=' + phone + '&tipo=' + tipo + '&icon=' + icon;
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), { text: link, width: 220, height: 220, colorDark: '#000000', colorLight: '#ffffff' });
+    document.getElementById('qrNome').textContent = nome;
+    document.getElementById('qrInfo').textContent = tipo === 'crianca' ? idade + ' anos  •  ' + descPlano : raca + '  •  ' + descPlano;
+    document.getElementById('qrId').textContent = 'ID: ' + id;
+    irPara(6);
+  }
+</script>
+</body>
+</html>
